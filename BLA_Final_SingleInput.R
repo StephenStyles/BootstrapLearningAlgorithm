@@ -106,12 +106,12 @@ for(v in 1:1){
     traindata = traindata[sample(1:nrow(traindata)),]
     
     #Size of sampling set:
-    m <- smp_size/(splits[epoch])
+    batchsize=floor(smp_size/splits[epoch])
     #Let k be the number of mini batches for the sampling set, this is not yet generalized and will not work with random values
     for(k in 1:splits[epoch]){
       #These values move along the data sets so that we see new observations throughout the process
-      a = 1 + m*(k-1)
-      b = m*k
+      a = 1 + batchsize*(k-1)
+      b = batchsize*k
       data1 = traindata[a:b,]
       
       #Tracking the observations and all their hidden layer values during the feed forward process.
@@ -119,7 +119,7 @@ for(v in 1:1){
       samplevalues = NULL
       
       #Feed forward through the network
-      for(i in 1:m){
+      for(i in 1:batchsize){
         singlesample = NULL
         x1 = c(1,as.numeric(data1[i,1]))
         y1 = w1 %*% x1
@@ -130,7 +130,6 @@ for(v in 1:1){
         samplevalues = rbind(samplevalues,singlesample)
       }
       
-      batchsize=smp_size/splits[epoch]
       
       #Set all the initial matrices
       A1=0
@@ -138,7 +137,7 @@ for(v in 1:1){
       B1=0
       B2=0
       #Update the weights based on the values in the updating set
-      for(i in 1:m){
+      for(i in 1:batchsize){
         updatex1 = c(1,as.numeric(data1[i,1]))
         updatey2 = as.numeric(data1[i,2])
         
@@ -178,7 +177,6 @@ for(v in 1:1){
           A2check = A2/batchsize
           B1check = B1/batchsize
           B2check = B2/batchsize
-          print("test")
         } else{
           A1check = A1check/2 + A1/(2*batchsize)
           A2check = A2check/2 + A2/(2*batchsize)
