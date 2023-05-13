@@ -52,13 +52,6 @@ main <- function(epochs){
   upperbound <<- 4
   lowerbound <<- -1
   
-  #Reseting the accuracy so that we can track it throughout the algorithm
-  it <<- 1
-  
-  #Number of splits in the dataset
-  splits <<- c(10,5,4,3,2,rep(1,epochs-5))
-  #splits <<- c(rep(1,epochs))
-  
   #Sample Size
   smp_size <<- 6000
   
@@ -80,7 +73,7 @@ splitsLog <- function(epochs){
   #splits <<- c(rep(1,epochs))
   
   #Create log to store all MSE values
-  mse_log <<- matrix(NA, nrow = sum(splits), ncol=0)
+  mse_log <<- matrix(NA, nrow = epochs, ncol=0)
 }
 
 
@@ -107,7 +100,7 @@ for(v in 1:1){
     
     #Size of sampling set:
     batchsize=floor(smp_size/splits[epoch])
-    #Let k be the number of mini batches for the sampling set, this is not yet generalized and will not work with random values
+    
     for(k in 1:splits[epoch]){
       #These values move along the data sets so that we see new observations throughout the process
       a = 1 + batchsize*(k-1)
@@ -143,7 +136,8 @@ for(v in 1:1){
         
         distances = abs(updatex1[2]-samplevalues[,2])
         samples = sort(distances, index.return=TRUE, decreasing=FALSE)
-        nn = samples$ix[1:delta]
+        value = max(delta+1-epoch,8)
+        nn = samples$ix[1:value]
         
         tmpvalues = samplevalues[nn,]
         
@@ -190,8 +184,8 @@ for(v in 1:1){
         B2check = B2check/2 + B2/(2*batchsize)
       }
       
-      gain1 = 1.95/max(eigen(A1check)$values)
-      gain2 = 1.95/max(eigen(A2check)$values)
+      gain1 = 2/(max(eigen(A1check)$values)+min(eigen(A1check)$values))
+      gain2 = 2/(max(eigen(A2check)$values)+min(eigen(A1check)$values))
       
       for(s in 1:100000){
         w1 = w1 + gain1*(B1check-w1%*%A1check)
